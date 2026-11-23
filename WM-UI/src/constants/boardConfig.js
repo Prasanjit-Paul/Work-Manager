@@ -1,4 +1,5 @@
-export const API = 'http://localhost:8080/tasks';
+export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080').replace(/\/$/, '');
+export const API = `${API_BASE_URL}/tasks`;
 
 export const INK = '#1b1033';
 export const hard = (n = 4) => `${n}px ${n}px 0 ${INK}`;
