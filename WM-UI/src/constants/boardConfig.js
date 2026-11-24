@@ -1,4 +1,4 @@
-export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080').replace(/\/$/, '');
+export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5134').replace(/\/$/, '');
 export const API = `${API_BASE_URL}/tasks`;
 
 export const INK = '#1b1033';

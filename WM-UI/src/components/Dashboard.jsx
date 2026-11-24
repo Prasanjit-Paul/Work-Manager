@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography, Button, Avatar } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import MenuIcon from '@mui/icons-material/Menu';
 import { API, INK, hard, stages } from '../constants/boardConfig';
@@ -9,14 +9,16 @@ import AddTaskForm from './AddTaskForm';
 import StageColumn from './StageColumn';
 import HistoryDialog from './HistoryDialog';
 import ReportsView from './ReportsView';
+import MyProfile from './MyProfile';
 
 const pageTitles = {
   Board: 'Management',
   Reports: 'Task Reports',
   Team: 'Team',
+  'My Profile': 'My Profile',
 };
 
-export default function Dashboard() {
+export default function Dashboard({ user, onProfileUpdated, onLogout }) {
   const [tasks, setTasks] = useState([]);
   const [overStage, setOverStage] = useState(null);
   const [logsOpen, setLogsOpen] = useState(false);
@@ -101,7 +103,15 @@ export default function Dashboard() {
               '&:active': { boxShadow: 'none', transform: 'translate(3px, 3px)' },
             }}
           >
-            <AccountCircleIcon sx={{ fontSize: 28 }} />
+            {user?.avatarUrl ? (
+              <Avatar
+                src={user.avatarUrl}
+                alt={user.name}
+                sx={{ width: 28, height: 28, border: `2px solid ${INK}` }}
+              />
+            ) : (
+              <AccountCircleIcon sx={{ fontSize: 28 }} />
+            )}
             <MenuIcon sx={{ fontSize: 24 }} />
           </Button>
         </Box>
@@ -145,6 +155,10 @@ export default function Dashboard() {
             <Typography sx={{ fontSize: 20, fontWeight: 700 }}>Team view coming soon.</Typography>
           </Box>
         )}
+
+        {activeTab === 'My Profile' && (
+          <MyProfile user={user} onProfileUpdated={onProfileUpdated} />
+        )}
       </Box>
 
       <Sidebar
@@ -152,6 +166,8 @@ export default function Dashboard() {
         onClose={() => setMenuOpen(false)}
         activeTab={activeTab}
         onSelectTab={setActiveTab}
+        user={user}
+        onLogout={onLogout}
       />
       <HistoryDialog open={logsOpen} logs={logs} onClose={() => setLogsOpen(false)} />
     </Box>
