@@ -77,7 +77,7 @@ export default function Dashboard({ user, onProfileUpdated, onLogout }) {
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#e6dcff', color: INK }}>
-      <Box component="main" sx={{ width: '100%', p: { xs: 2, md: 5 } }}>
+      <Box component="main" sx={{ width: '100%', boxSizing: 'border-box', p: { xs: 2, md: 5 } }}>
         {/* Header Row */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
           <Typography component="h1" sx={{ fontSize: { xs: 30, md: 44 }, fontWeight: 700 }}>
