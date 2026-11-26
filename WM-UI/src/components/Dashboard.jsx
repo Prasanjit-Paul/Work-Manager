@@ -25,23 +25,28 @@ export default function Dashboard() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('Board');
 
-  const loadTasks = () => axios.get(API).then((res) => setTasks(res.data));
+  const loadTasks = () => {
+    if (!user?.id) return;
+    axios.get(API, { params: { userId: user.id } }).then((res) => setTasks(res.data));
+  };
 
-  const loadAllLogs = () =>
+  const loadAllLogs = () => {
+    if (!user?.id) return;
     axios
-      .get(`${API}/logs`)
+      .get(`${API}/logs`, { params: { userId: user.id } })
       .then((res) => setActivityLogs(res.data))
       .catch((err) => console.error('Error fetching activity logs', err));
+  };
 
   useEffect(() => {
     loadTasks();
     if (activeTab === 'Reports') {
       loadAllLogs();
     }
-  }, [activeTab]);
+  }, [activeTab, user?.id]);
 
   const handleAddTask = (newTask) => {
-    axios.post(API, newTask).then((res) => {
+    axios.post(API, { ...newTask, userId: user.id }).then((res) => {
       setTasks((prev) => [...prev, res.data]);
     });
   };
@@ -54,18 +59,22 @@ export default function Dashboard() {
     if (!task || task.stage === targetStage) return;
 
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, stage: targetStage } : t)));
-    axios.put(`${API}/${id}`, { ...task, stage: targetStage }).catch(loadTasks);
+    axios
+      .put(`${API}/${id}`, { ...task, userId: user.id, stage: targetStage })
+      .catch(loadTasks);
   };
 
   const handleDelete = (id) => {
-    axios.delete(`${API}/${id}`).then(() => {
-      setTasks((prev) => prev.filter((t) => t.id !== id));
+    const previousTasks = tasks;
+    setTasks((prev) => prev.filter((t) => t.id !== id));
+    axios.delete(`${API}/${id}`, { params: { userId: user.id } }).catch(() => {
+      setTasks(previousTasks);
     });
   };
 
   const showLogs = (id) => {
     axios
-      .get(`${API}/${id}/logs`)
+      .get(`${API}/${id}/logs`, { params: { userId: user.id } })
       .then((res) => {
         setLogs(res.data);
         setLogsOpen(true);
