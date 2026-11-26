@@ -1,150 +1,74 @@
 import { Box, Typography, Chip } from '@mui/material';
-import { INK, hard, stages, importanceColor } from '../constants/boardConfig';
+import { INK, MUTED, TINT, FONT, cardSx, chipSx, stages, importanceColor, importanceBar } from '../constants/boardConfig';
 
-const cardSx = {
-  bgcolor: '#fff',
-  border: `3px solid ${INK}`,
-  borderRadius: '16px',
-  boxShadow: hard(6),
-  p: 3,
-};
+const sectionTitle = { fontFamily: FONT, fontSize: 20, fontWeight: 800, mb: 2.5 };
+
+function BarRow({ label, count, pct, color }) {
+  return (
+    <Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.8 }}>
+        <Typography sx={{ fontFamily: FONT, fontWeight: 700 }}>{label}</Typography>
+        <Typography sx={{ fontFamily: FONT, fontWeight: 800 }}>
+          {count} ({pct}%)
+        </Typography>
+      </Box>
+      <Box sx={{ height: 14, bgcolor: TINT, borderRadius: 99, overflow: 'hidden' }}>
+        <Box sx={{ width: `${pct}%`, height: '100%', bgcolor: color, borderRadius: 99, transition: 'width 0.3s ease' }} />
+      </Box>
+    </Box>
+  );
+}
 
 export default function ReportsView({ tasks, activityLogs = [] }) {
   const total = tasks.length;
-  const doneCount = tasks.filter((t) => t.stage === 'DONE').length;
-  const inProgressCount = tasks.filter((t) => t.stage === 'IN PROGRESS').length;
-  const draftCount = tasks.filter((t) => t.stage === 'DRAFT').length;
-  const completionRate = total > 0 ? Math.round((doneCount / total) * 100) : 0;
-
+  const count = (key) => tasks.filter((t) => t.stage === key).length;
+  const pctOf = (n) => (total > 0 ? Math.round((n / total) * 100) : 0);
+  const doneCount = count('DONE');
   const taskTitleMap = Object.fromEntries(tasks.map((t) => [t.id, t.title]));
 
   const summaryCards = [
-    { label: 'Total Tasks', value: total, bg: '#fff' },
-    { label: 'Draft', value: draftCount, bg: '#ffd166' },
-    { label: 'In Progress', value: inProgressCount, bg: '#7bdff2' },
-    { label: 'Completed', value: `${doneCount} (${completionRate}%)`, bg: '#b8f2a8' },
+    { label: 'Total tasks', value: total, bg: '#fff' },
+    { label: 'Draft', value: count('DRAFT'), bg: '#ffe3ec' },
+    { label: 'In progress', value: count('IN PROGRESS'), bg: '#dfe9ff' },
+    { label: 'Completed', value: `${doneCount} (${pctOf(doneCount)}%)`, bg: '#dcf5e7' },
   ];
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      {/* Top KPI Cards */}
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
-          gap: 3,
-        }}
-      >
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 3 }}>
         {summaryCards.map((item) => (
-          <Box key={item.label} sx={{ ...cardSx, bgcolor: item.bg }}>
-            <Typography sx={{ fontSize: 14, fontWeight: 700, opacity: 0.8 }}>
-              {item.label}
-            </Typography>
-            <Typography sx={{ fontSize: 34, fontWeight: 700, mt: 1 }}>
-              {item.value}
-            </Typography>
+          <Box key={item.label} sx={{ ...cardSx, bgcolor: item.bg, boxShadow: item.bg === '#fff' ? cardSx.boxShadow : 'none' }}>
+            <Typography sx={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: MUTED }}>{item.label}</Typography>
+            <Typography sx={{ fontFamily: FONT, fontSize: 36, fontWeight: 800, mt: 0.5 }}>{item.value}</Typography>
           </Box>
         ))}
       </Box>
 
-      {/* Visual Breakdown Bars */}
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' },
-          gap: 3,
-        }}
-      >
-        {/* By Stage */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 3 }}>
         <Box sx={cardSx}>
-          <Typography sx={{ fontSize: 20, fontWeight: 700, mb: 2.5 }}>
-            Tasks by Stage
-          </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.2 }}>
-            {stages.map(({ key, label, color }) => {
-              const count = tasks.filter((t) => t.stage === key).length;
-              const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-              return (
-                <Box key={key}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.7 }}>
-                    <Typography sx={{ fontWeight: 600 }}>{label}</Typography>
-                    <Typography sx={{ fontWeight: 700 }}>
-                      {count} ({pct}%)
-                    </Typography>
-                  </Box>
-                  <Box
-                    sx={{
-                      height: 22,
-                      bgcolor: '#f3eeff',
-                      border: `2px solid ${INK}`,
-                      borderRadius: '8px',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        width: `${pct}%`,
-                        height: '100%',
-                        bgcolor: color,
-                        transition: 'width 0.3s ease',
-                      }}
-                    />
-                  </Box>
-                </Box>
-              );
-            })}
+          <Typography sx={sectionTitle}>Tasks by stage</Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.4 }}>
+            {stages.map(({ key, label, bar }) => (
+              <BarRow key={key} label={label} count={count(key)} pct={pctOf(count(key))} color={bar} />
+            ))}
           </Box>
         </Box>
 
-        {/* By Importance */}
         <Box sx={cardSx}>
-          <Typography sx={{ fontSize: 20, fontWeight: 700, mb: 2.5 }}>
-            Tasks by Importance
-          </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.2 }}>
-            {Object.entries(importanceColor).map(([level, color]) => {
-              const count = tasks.filter((t) => t.importance === level).length;
-              const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-              return (
-                <Box key={level}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.7 }}>
-                    <Typography sx={{ fontWeight: 600 }}>{level}</Typography>
-                    <Typography sx={{ fontWeight: 700 }}>
-                      {count} ({pct}%)
-                    </Typography>
-                  </Box>
-                  <Box
-                    sx={{
-                      height: 22,
-                      bgcolor: '#f3eeff',
-                      border: `2px solid ${INK}`,
-                      borderRadius: '8px',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        width: `${pct}%`,
-                        height: '100%',
-                        bgcolor: color,
-                        transition: 'width 0.3s ease',
-                      }}
-                    />
-                  </Box>
-                </Box>
-              );
+          <Typography sx={sectionTitle}>Tasks by importance</Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.4 }}>
+            {Object.keys(importanceColor).map((level) => {
+              const n = tasks.filter((t) => t.importance === level).length;
+              return <BarRow key={level} label={level} count={n} pct={pctOf(n)} color={importanceBar[level]} />;
             })}
           </Box>
         </Box>
       </Box>
 
-      {/* All Tasks Summary List */}
       <Box sx={cardSx}>
-        <Typography sx={{ fontSize: 20, fontWeight: 700, mb: 2 }}>
-          Task Overview
-        </Typography>
+        <Typography sx={sectionTitle}>Task overview</Typography>
         {tasks.length === 0 ? (
-          <Typography sx={{ opacity: 0.75 }}>No tasks available to report.</Typography>
+          <Typography sx={{ fontFamily: FONT, color: MUTED }}>No tasks available to report.</Typography>
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
             {tasks.map((task) => {
@@ -152,45 +76,15 @@ export default function ReportsView({ tasks, activityLogs = [] }) {
               return (
                 <Box
                   key={task.id}
-                  sx={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: 1.5,
-                    p: 1.5,
-                    border: `2px solid ${INK}`,
-                    borderRadius: '10px',
-                    bgcolor: '#faf7ff',
-                  }}
+                  sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 1.5, p: 2, bgcolor: TINT, borderRadius: '20px' }}
                 >
-                  <Box>
-                    <Typography sx={{ fontWeight: 700 }}>{task.title}</Typography>
-                    <Typography sx={{ fontSize: 13, color: '#4a3b73' }}>
-                      {task.description}
-                    </Typography>
+                  <Box sx={{ minWidth: 0 }}>
+                    <Typography sx={{ fontFamily: FONT, fontWeight: 800 }}>{task.title}</Typography>
+                    <Typography sx={{ fontFamily: FONT, fontSize: 13, color: MUTED }}>{task.description}</Typography>
                   </Box>
                   <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Chip
-                      label={task.importance}
-                      size="small"
-                      sx={{
-                        fontWeight: 600,
-                        color: INK,
-                        bgcolor: importanceColor[task.importance] || '#fff3b0',
-                        border: `2px solid ${INK}`,
-                      }}
-                    />
-                    <Chip
-                      label={stageObj ? stageObj.label : task.stage}
-                      size="small"
-                      sx={{
-                        fontWeight: 700,
-                        color: INK,
-                        bgcolor: stageObj ? stageObj.color : '#fff',
-                        border: `2px solid ${INK}`,
-                      }}
-                    />
+                    <Chip label={task.importance} size="small" sx={chipSx(importanceColor[task.importance] || '#fff0b8')} />
+                    <Chip label={stageObj ? stageObj.label : task.stage} size="small" sx={chipSx(stageObj ? stageObj.color : '#fff')} />
                   </Box>
                 </Box>
               );
@@ -199,13 +93,10 @@ export default function ReportsView({ tasks, activityLogs = [] }) {
         )}
       </Box>
 
-      {/* Global Activity Logs from /tasks/logs */}
       <Box sx={cardSx}>
-        <Typography sx={{ fontSize: 20, fontWeight: 700, mb: 2 }}>
-          Recent Activity
-        </Typography>
+        <Typography sx={sectionTitle}>Recent activity</Typography>
         {activityLogs.length === 0 ? (
-          <Typography sx={{ opacity: 0.75 }}>
+          <Typography sx={{ fontFamily: FONT, color: MUTED }}>
             No stage movements recorded yet. Drag a task on the Board to see activity here.
           </Typography>
         ) : (
@@ -213,27 +104,15 @@ export default function ReportsView({ tasks, activityLogs = [] }) {
             {activityLogs.map((log) => (
               <Box
                 key={log.id}
-                sx={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: 1,
-                  p: 1.5,
-                  border: `2px solid ${INK}`,
-                  borderRadius: '10px',
-                  bgcolor: '#fffdf2',
-                }}
+                sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 1, p: 2, bgcolor: TINT, borderRadius: '20px' }}
               >
                 <Box>
-                  <Typography sx={{ fontWeight: 700 }}>
+                  <Typography sx={{ fontFamily: FONT, fontWeight: 800 }}>
                     {taskTitleMap[log.taskId] || `Task #${log.taskId}`}
                   </Typography>
-                  <Typography sx={{ fontSize: 14, color: '#4a3b73' }}>
-                    {log.message}
-                  </Typography>
+                  <Typography sx={{ fontFamily: FONT, fontSize: 14, color: MUTED }}>{log.message}</Typography>
                 </Box>
-                <Typography sx={{ fontSize: 13, fontWeight: 600, opacity: 0.75 }}>
+                <Typography sx={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: MUTED }}>
                   {new Date(log.timestamp).toLocaleString()}
                 </Typography>
               </Box>

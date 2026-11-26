@@ -17,6 +17,14 @@ body,
 }
 
 body {
-  background: #e6dcff;
-  font-family: 'Space Grotesk', system-ui, sans-serif;
+  background: #eef1f8;
+  color: #25294a;
+  font-family: 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: #25294a;
+  color: #fff;
 }

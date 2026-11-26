@@ -3,16 +3,17 @@ import axios from 'axios';
 import { Box, Typography, Button, Avatar } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import MenuIcon from '@mui/icons-material/Menu';
-import { API, INK, hard, stages } from '../constants/boardConfig';
+import { API, API_BASE_URL, INK, SHADOW, PAGE_BG, FONT, stages } from '../constants/boardConfig';
 import Sidebar from './Sidebar';
 import AddTaskForm from './AddTaskForm';
 import StageColumn from './StageColumn';
 import HistoryDialog from './HistoryDialog';
 import ReportsView from './ReportsView';
 import MyProfile from './MyProfile';
+import TeamView from './TeamView';
 
 const pageTitles = {
-  Board: 'Management',
+  Board: 'Task Management',
   Reports: 'Task Reports',
   Team: 'Team',
   'My Profile': 'My Profile',
@@ -26,10 +27,15 @@ export default function Dashboard({ user, onProfileUpdated, onLogout }) {
   const [activityLogs, setActivityLogs] = useState([]);
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('Board');
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [teamLoading, setTeamLoading] = useState(false);
 
   const loadTasks = () => {
     if (!user?.id) return;
-    axios.get(API, { params: { userId: user.id } }).then((res) => setTasks(res.data));
+    axios
+      .get(API, { params: { userId: user.id } })
+      .then((res) => setTasks(res.data))
+      .catch((err) => console.error('Error fetching tasks', err));
   };
 
   const loadAllLogs = () => {
@@ -40,17 +46,27 @@ export default function Dashboard({ user, onProfileUpdated, onLogout }) {
       .catch((err) => console.error('Error fetching activity logs', err));
   };
 
+  const loadTeam = () => {
+    setTeamLoading(true);
+    axios
+      .get(`${API_BASE_URL}/api/users`)
+      .then((res) => setTeamMembers(res.data))
+      .catch((err) => console.error('Error fetching team members', err))
+      .finally(() => setTeamLoading(false));
+  };
+
   useEffect(() => {
     loadTasks();
-    if (activeTab === 'Reports') {
-      loadAllLogs();
-    }
+    if (activeTab === 'Reports') loadAllLogs();
+    if (activeTab === 'Team') loadTeam();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, user?.id]);
 
   const handleAddTask = (newTask) => {
-    axios.post(API, { ...newTask, userId: user.id }).then((res) => {
-      setTasks((prev) => [...prev, res.data]);
-    });
+    axios
+      .post(API, { ...newTask, userId: user.id })
+      .then((res) => setTasks((prev) => [...prev, res.data]))
+      .catch((err) => console.error('Error adding task', err));
   };
 
   const handleDrop = (e, targetStage) => {
@@ -61,17 +77,13 @@ export default function Dashboard({ user, onProfileUpdated, onLogout }) {
     if (!task || task.stage === targetStage) return;
 
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, stage: targetStage } : t)));
-    axios
-      .put(`${API}/${id}`, { ...task, userId: user.id, stage: targetStage })
-      .catch(loadTasks);
+    axios.put(`${API}/${id}`, { ...task, userId: user.id, stage: targetStage }).catch(loadTasks);
   };
 
   const handleDelete = (id) => {
     const previousTasks = tasks;
     setTasks((prev) => prev.filter((t) => t.id !== id));
-    axios.delete(`${API}/${id}`, { params: { userId: user.id } }).catch(() => {
-      setTasks(previousTasks);
-    });
+    axios.delete(`${API}/${id}`, { params: { userId: user.id } }).catch(() => setTasks(previousTasks));
   };
 
   const showLogs = (id) => {
@@ -85,11 +97,10 @@ export default function Dashboard({ user, onProfileUpdated, onLogout }) {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#e6dcff', color: INK }}>
-      <Box component="main" sx={{ width: '100%', boxSizing: 'border-box', p: { xs: 2, md: 5 } }}>
-        {/* Header Row */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography component="h1" sx={{ fontSize: { xs: 30, md: 44 }, fontWeight: 700 }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: PAGE_BG, color: INK, fontFamily: FONT }}>
+      <Box component="main" sx={{ width: '100%', p: { xs: '24px 20px', md: '36px 48px' }, textAlign: 'left' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, gap: 2 }}>
+          <Typography component="h1" sx={{ fontFamily: FONT, fontSize: { xs: 30, md: 42 }, fontWeight: 800, lineHeight: 1.1 }}>
             {pageTitles[activeTab]}
           </Typography>
 
@@ -102,34 +113,35 @@ export default function Dashboard({ user, onProfileUpdated, onLogout }) {
               gap: 1,
               bgcolor: '#fff',
               color: INK,
-              border: `3px solid ${INK}`,
-              borderRadius: '12px',
-              boxShadow: hard(4),
-              px: 1.5,
-              py: 0.8,
+              borderRadius: '18px',
+              boxShadow: SHADOW,
+              height: 52,
+              px: 1.8,
               minWidth: 'auto',
-              '&:hover': { bgcolor: '#ffd166' },
-              '&:active': { boxShadow: 'none', transform: 'translate(3px, 3px)' },
+              '&:hover': { bgcolor: '#f6f8fc' },
+              '&.Mui-focusVisible': { outline: `2px solid ${INK}` },
             }}
           >
             {user?.avatarUrl ? (
-              <Avatar
-                src={user.avatarUrl}
-                alt={user.name}
-                sx={{ width: 28, height: 28, border: `2px solid ${INK}` }}
-              />
+              <Avatar src={user.avatarUrl} alt={user.name} sx={{ width: 30, height: 30 }} />
             ) : (
-              <AccountCircleIcon sx={{ fontSize: 28 }} />
+              <AccountCircleIcon sx={{ fontSize: 30 }} />
             )}
             <MenuIcon sx={{ fontSize: 24 }} />
           </Button>
         </Box>
 
-        {/* Active View */}
         {activeTab === 'Board' && (
           <>
             <AddTaskForm onAddTask={handleAddTask} />
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 3 }}>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', '@media (min-width:900px)': 'repeat(3, 1fr)' },
+                gap: '24px',
+                alignItems: 'start',
+              }}
+            >
               {stages.map((stage) => (
                 <StageColumn
                   key={stage.key}
@@ -147,27 +159,9 @@ export default function Dashboard({ user, onProfileUpdated, onLogout }) {
           </>
         )}
 
-        {activeTab === 'Reports' && (
-          <ReportsView tasks={tasks} activityLogs={activityLogs} />
-        )}
-
-        {activeTab === 'Team' && (
-          <Box
-            sx={{
-              bgcolor: '#fff',
-              border: `3px solid ${INK}`,
-              borderRadius: '16px',
-              boxShadow: hard(6),
-              p: 4,
-            }}
-          >
-            <Typography sx={{ fontSize: 20, fontWeight: 700 }}>Team view coming soon.</Typography>
-          </Box>
-        )}
-
-        {activeTab === 'My Profile' && (
-          <MyProfile user={user} onProfileUpdated={onProfileUpdated} />
-        )}
+        {activeTab === 'Reports' && <ReportsView tasks={tasks} activityLogs={activityLogs} />}
+        {activeTab === 'Team' && <TeamView members={teamMembers} currentUser={user} loading={teamLoading} />}
+        {activeTab === 'My Profile' && <MyProfile user={user} onProfileUpdated={onProfileUpdated} />}
       </Box>
 
       <Sidebar

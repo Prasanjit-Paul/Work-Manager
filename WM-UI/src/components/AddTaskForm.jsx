@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Box, TextField, Button, MenuItem, Select } from '@mui/material';
-import { INK, hard, importanceColor, fieldSx } from '../constants/boardConfig';
+import { INK, SHADOW, FONT, importanceColor, fieldSx, controlSx, primaryBtnSx } from '../constants/boardConfig';
 
 export default function AddTaskForm({ onAddTask }) {
   const [title, setTitle] = useState('');
@@ -10,14 +10,12 @@ export default function AddTaskForm({ onAddTask }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!title.trim()) return;
-
     onAddTask({
-      title,
-      description: description || 'No description provided',
+      title: title.trim(),
+      description: description.trim() || 'No description provided',
       stage: 'DRAFT',
       importance,
     });
-
     setTitle('');
     setDescription('');
     setImportance('Main Task');
@@ -27,7 +25,7 @@ export default function AddTaskForm({ onAddTask }) {
     <Box
       component="form"
       onSubmit={handleSubmit}
-      sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 5 }}
+      sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 5, alignItems: 'flex-start' }}
     >
       <TextField
         placeholder="Task title..."
@@ -47,29 +45,17 @@ export default function AddTaskForm({ onAddTask }) {
       <Select
         value={importance}
         onChange={(e) => setImportance(e.target.value)}
-        sx={{ ...fieldSx, minWidth: 180 }}
+        sx={{ ...controlSx, minWidth: 190 }}
         inputProps={{ 'aria-label': 'Importance' }}
+        MenuProps={{ slotProps: { paper: { sx: { borderRadius: '18px', mt: 1, boxShadow: SHADOW } } } }}
       >
         {Object.keys(importanceColor).map((v) => (
-          <MenuItem key={v} value={v}>{v}</MenuItem>
+          <MenuItem key={v} value={v} sx={{ fontFamily: FONT, fontWeight: 700, color: INK }}>
+            {v}
+          </MenuItem>
         ))}
       </Select>
-      <Button
-        type="submit"
-        sx={{
-          bgcolor: '#ff5da2',
-          color: INK,
-          fontWeight: 700,
-          fontSize: 15,
-          px: 4,
-          textTransform: 'none',
-          borderRadius: '10px',
-          border: `3px solid ${INK}`,
-          boxShadow: hard(4),
-          '&:hover': { bgcolor: '#ff7ab4' },
-          '&:active': { boxShadow: 'none', transform: 'translate(4px, 4px)' },
-        }}
-      >
+      <Button type="submit" sx={primaryBtnSx}>
         Add task
       </Button>
     </Box>

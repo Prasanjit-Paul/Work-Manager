@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Box, Typography, TextField, Button, Avatar, Chip, Alert, Grid } from '@mui/material';
-import { API_BASE_URL, INK, hard, fieldSx } from '../constants/boardConfig';
+import { useState } from 'react';
+import { Box, Typography, Button, Avatar, Chip, Alert } from '@mui/material';
+import { API_BASE_URL, INK, MUTED, FONT, cardSx, chipSx, primaryBtnSx } from '../constants/boardConfig';
+import Field from './Field';
 
 export default function MyProfile({ user, onProfileUpdated }) {
   const [form, setForm] = useState({
@@ -14,11 +15,12 @@ export default function MyProfile({ user, onProfileUpdated }) {
   const [status, setStatus] = useState({ type: '', msg: '' });
   const [saving, setSaving] = useState(false);
 
+  const set = (key) => (e) => setForm({ ...form, [key]: e.target.value });
+
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
     setStatus({ type: '', msg: '' });
-
     try {
       const res = await fetch(`${API_BASE_URL}/api/users/${user.id}`, {
         method: 'PUT',
@@ -27,9 +29,8 @@ export default function MyProfile({ user, onProfileUpdated }) {
       });
       const updated = await res.json();
       if (!res.ok) throw new Error(updated.error || 'Failed to update profile');
-
       onProfileUpdated(updated);
-      setStatus({ type: 'success', msg: 'Profile saved successfully.' });
+      setStatus({ type: 'success', msg: 'Profile saved.' });
     } catch (err) {
       setStatus({ type: 'error', msg: err.message });
     } finally {
@@ -38,60 +39,42 @@ export default function MyProfile({ user, onProfileUpdated }) {
   };
 
   return (
-    <Box sx={{ maxWidth: 760, mx: 'auto', p: { xs: 2, md: 3 } }}>
-      <Box sx={{ bgcolor: '#fff', border: `3px solid ${INK}`, borderRadius: '14px', boxShadow: hard(6), p: { xs: 2.5, md: 4 } }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2.5, mb: 3, flexWrap: 'wrap' }}>
-          <Avatar
-            src={user.avatarUrl}
-            alt={user.name}
-            sx={{ width: 72, height: 72, bgcolor: '#c9b6ff', color: INK, fontWeight: 800, fontSize: 28, border: `3px solid ${INK}` }}
-          >
+    <Box sx={{ maxWidth: 760, mx: 'auto' }}>
+      <Box sx={{ ...cardSx, p: { xs: 2.5, md: 4 } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2.5, mb: 3.5, flexWrap: 'wrap' }}>
+          <Avatar src={user.avatarUrl} alt={user.name} sx={{ width: 72, height: 72, bgcolor: '#e4defa', color: INK, fontWeight: 800, fontSize: 28 }}>
             {user.name?.[0]?.toUpperCase()}
           </Avatar>
           <Box>
-            <Typography variant="h5" sx={{ fontWeight: 800, color: INK }}>{user.name}</Typography>
-            <Typography variant="body2" sx={{ color: INK, opacity: 0.8, mb: 0.5 }}>{user.email}</Typography>
+            <Typography sx={{ fontFamily: FONT, fontSize: 24, fontWeight: 800 }}>{user.name}</Typography>
+            <Typography sx={{ fontFamily: FONT, fontSize: 14, color: MUTED, mb: 0.8 }}>{user.email}</Typography>
             <Chip
-              label={`Signed in via ${user.authProvider}`}
+              label={`Signed in with ${user.authProvider === 'GOOGLE' ? 'Google' : 'email'}`}
               size="small"
-              sx={{ bgcolor: user.authProvider === 'GOOGLE' ? '#b7e9f3' : '#fff3b0', color: INK, fontWeight: 700, border: `2px solid ${INK}` }}
+              sx={chipSx(user.authProvider === 'GOOGLE' ? '#dfe9ff' : '#fff0b8')}
             />
           </Box>
         </Box>
 
-        {status.msg && <Alert severity={status.type} sx={{ mb: 3, border: `2px solid ${INK}` }}>{status.msg}</Alert>}
+        {status.msg && (
+          <Alert severity={status.type} sx={{ mb: 3, borderRadius: '18px', fontFamily: FONT, fontWeight: 600 }}>
+            {status.msg}
+          </Alert>
+        )}
 
         <Box component="form" onSubmit={handleSave}>
-          <Grid container spacing={2.5}>
-            <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="Email (Login ID)" value={user.email} disabled sx={fieldSx} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="Full Name" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} sx={fieldSx} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="Job Role / Title (Optional)" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} sx={fieldSx} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="Department / Team (Optional)" value={form.department} onChange={(e) => setForm({ ...form, department: e.target.value })} sx={fieldSx} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="Phone Number (Optional)" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} sx={fieldSx} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="Location (Optional)" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} sx={fieldSx} />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField fullWidth multiline rows={3} label="Bio / About (Optional)" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} sx={fieldSx} />
-            </Grid>
-          </Grid>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 2.5 }}>
+            <Field label="Email (login ID)" value={user.email} disabled />
+            <Field label="Full name" required value={form.name} onChange={set('name')} placeholder="Your name" />
+            <Field label="Job role / title" value={form.role} onChange={set('role')} placeholder="Optional" />
+            <Field label="Department / team" value={form.department} onChange={set('department')} placeholder="Optional" />
+            <Field label="Phone number" value={form.phone} onChange={set('phone')} placeholder="Optional" />
+            <Field label="Location" value={form.location} onChange={set('location')} placeholder="Optional" />
+            <Field label="Bio / about" multiline rows={3} value={form.bio} onChange={set('bio')} placeholder="Optional" sx={{ gridColumn: '1 / -1' }} />
+          </Box>
 
-          <Button
-            type="submit"
-            disabled={saving}
-            sx={{ mt: 3, px: 4, py: 1.2, bgcolor: '#d9f1d3', color: INK, fontWeight: 800, border: `3px solid ${INK}`, borderRadius: '10px', boxShadow: hard(4), '&:hover': { bgcolor: '#c2e8b8' } }}
-          >
-            {saving ? 'Saving...' : 'Save Profile'}
+          <Button type="submit" disabled={saving} sx={{ ...primaryBtnSx, mt: 3.5 }}>
+            {saving ? 'Saving...' : 'Save profile'}
           </Button>
         </Box>
       </Box>

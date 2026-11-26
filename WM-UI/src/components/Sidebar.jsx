@@ -5,7 +5,7 @@ import BarChartIcon from '@mui/icons-material/BarChart';
 import GroupsIcon from '@mui/icons-material/Groups';
 import PersonIcon from '@mui/icons-material/Person';
 import LogoutIcon from '@mui/icons-material/Logout';
-import { INK, hard } from '../constants/boardConfig';
+import { INK, MUTED, TINT, FONT } from '../constants/boardConfig';
 
 const navItems = [
   { label: 'Board', icon: <ViewKanbanIcon /> },
@@ -13,6 +13,18 @@ const navItems = [
   { label: 'Team', icon: <GroupsIcon /> },
   { label: 'My Profile', icon: <PersonIcon /> },
 ];
+
+const navBtn = {
+  justifyContent: 'flex-start',
+  fontFamily: FONT,
+  fontWeight: 700,
+  fontSize: 15,
+  textTransform: 'none',
+  py: 1.4,
+  px: 2,
+  borderRadius: '18px',
+  boxShadow: 'none',
+};
 
 export default function Sidebar({ open, onClose, activeTab, onSelectTab, user, onLogout }) {
   return (
@@ -23,80 +35,41 @@ export default function Sidebar({ open, onClose, activeTab, onSelectTab, user, o
       slotProps={{
         paper: {
           sx: {
-            width: 260,
-            bgcolor: '#ffd166',
-            borderLeft: `3px solid ${INK}`,
+            width: 280,
+            bgcolor: '#fff',
+            borderRadius: '32px 0 0 32px',
+            boxShadow: '0 16px 40px rgba(37, 41, 74, 0.18)',
             p: 3,
             display: 'flex',
             flexDirection: 'column',
-            gap: 2,
+            gap: 1.5,
           },
         },
       }}
     >
-      {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-        <Typography sx={{ fontSize: 24, fontWeight: 700, color: INK }}>
-          Menu
-        </Typography>
-        <IconButton
-          aria-label="Close menu"
-          onClick={onClose}
-          sx={{
-            color: INK,
-            bgcolor: '#fff',
-            border: `2px solid ${INK}`,
-            borderRadius: '8px',
-            boxShadow: hard(2),
-            p: 0.5,
-            '&:hover': { bgcolor: '#fff3b0' },
-          }}
-        >
+        <Typography sx={{ fontFamily: FONT, fontSize: 24, fontWeight: 800, color: INK }}>Menu</Typography>
+        <IconButton aria-label="Close menu" onClick={onClose} sx={{ color: INK, bgcolor: TINT, '&:hover': { bgcolor: '#e4e9f5' } }}>
           <CloseIcon fontSize="small" />
         </IconButton>
       </Box>
 
-      {/* Logged-in User Card */}
       {user && (
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1.5,
-            bgcolor: '#fff',
-            border: `3px solid ${INK}`,
-            borderRadius: '10px',
-            boxShadow: hard(3),
-            p: 1.2,
-          }}
-        >
-          <Avatar
-            src={user.avatarUrl}
-            alt={user.name}
-            sx={{
-              width: 36,
-              height: 36,
-              bgcolor: '#c9b6ff',
-              color: INK,
-              fontWeight: 800,
-              fontSize: 16,
-              border: `2px solid ${INK}`,
-            }}
-          >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, bgcolor: '#dfe9ff', borderRadius: '22px', p: 1.5, mb: 1 }}>
+          <Avatar src={user.avatarUrl} alt={user.name} sx={{ width: 40, height: 40, bgcolor: '#fff', color: INK, fontWeight: 800 }}>
             {user.name?.[0]?.toUpperCase()}
           </Avatar>
           <Box sx={{ minWidth: 0 }}>
-            <Typography sx={{ fontSize: 14, fontWeight: 700, color: INK }} noWrap>
+            <Typography sx={{ fontFamily: FONT, fontSize: 14, fontWeight: 800, color: INK }} noWrap>
               {user.name}
             </Typography>
-            <Typography sx={{ fontSize: 11, color: INK, opacity: 0.75 }} noWrap>
+            <Typography sx={{ fontFamily: FONT, fontSize: 12, color: MUTED }} noWrap>
               {user.email}
             </Typography>
           </Box>
         </Box>
       )}
 
-      {/* Navigation Tabs */}
       {navItems.map(({ label, icon }) => {
         const isActive = activeTab === label;
         return (
@@ -108,18 +81,10 @@ export default function Sidebar({ open, onClose, activeTab, onSelectTab, user, o
               onClose();
             }}
             sx={{
-              justifyContent: 'flex-start',
-              color: INK,
-              fontWeight: 600,
-              fontSize: 15,
-              textTransform: 'none',
-              py: 1.4,
-              px: 2,
-              borderRadius: '10px',
-              border: `3px solid ${INK}`,
-              bgcolor: isActive ? '#ff5da2' : '#fff',
-              boxShadow: isActive ? hard(4) : 'none',
-              '&:hover': { bgcolor: isActive ? '#ff5da2' : '#fff3b0' },
+              ...navBtn,
+              color: isActive ? '#fff' : INK,
+              bgcolor: isActive ? INK : TINT,
+              '&:hover': { bgcolor: isActive ? '#3a3f6b' : '#e4e9f5' },
             }}
           >
             {label}
@@ -127,28 +92,13 @@ export default function Sidebar({ open, onClose, activeTab, onSelectTab, user, o
         );
       })}
 
-      {/* Logout Button Pinned to Bottom */}
       <Button
         startIcon={<LogoutIcon />}
         onClick={() => {
           onClose();
           onLogout();
         }}
-        sx={{
-          mt: 'auto',
-          justifyContent: 'flex-start',
-          color: INK,
-          fontWeight: 700,
-          fontSize: 15,
-          textTransform: 'none',
-          py: 1.4,
-          px: 2,
-          borderRadius: '10px',
-          border: `3px solid ${INK}`,
-          bgcolor: '#f1e3c0',
-          boxShadow: hard(3),
-          '&:hover': { bgcolor: '#ff5da2' },
-        }}
+        sx={{ ...navBtn, mt: 'auto', color: INK, bgcolor: '#ffe3ec', '&:hover': { bgcolor: '#ffc2d4' } }}
       >
         Logout
       </Button>

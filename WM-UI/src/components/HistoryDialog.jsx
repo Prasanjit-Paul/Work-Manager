@@ -1,5 +1,5 @@
 import { Dialog, DialogTitle, DialogContent, List, ListItem, ListItemText, Typography } from '@mui/material';
-import { INK, hard } from '../constants/boardConfig';
+import { INK, MUTED, FONT } from '../constants/boardConfig';
 
 export default function HistoryDialog({ open, logs, onClose }) {
   return (
@@ -11,28 +11,28 @@ export default function HistoryDialog({ open, logs, onClose }) {
           sx: {
             bgcolor: '#fff',
             color: INK,
-            minWidth: { xs: 280, sm: 420 },
-            border: `3px solid ${INK}`,
-            borderRadius: '18px',
-            boxShadow: hard(8),
+            minWidth: { xs: 280, sm: 440 },
+            borderRadius: '28px',
+            boxShadow: '0 16px 40px rgba(37, 41, 74, 0.18)',
           },
         },
       }}
     >
-      <DialogTitle sx={{ fontWeight: 700, bgcolor: '#ffd166', borderBottom: `3px solid ${INK}` }}>
-        Task history
-      </DialogTitle>
+      <DialogTitle sx={{ fontFamily: FONT, fontWeight: 800, fontSize: 22, pt: 3 }}>Task history</DialogTitle>
       <DialogContent>
         {logs.length === 0 ? (
-          <Typography sx={{ mt: 2 }}>This task hasn't moved between stages yet.</Typography>
+          <Typography sx={{ fontFamily: FONT, color: MUTED }}>This task hasn't moved between stages yet.</Typography>
         ) : (
-          <List>
+          <List disablePadding>
             {logs.map((log) => (
-              <ListItem key={log.id} divider sx={{ borderColor: INK }}>
+              <ListItem key={log.id} divider sx={{ px: 0, borderColor: '#e6e9f4' }}>
                 <ListItemText
                   primary={log.message}
                   secondary={new Date(log.timestamp).toLocaleString()}
-                  slotProps={{ primary: { sx: { fontWeight: 600 } } }}
+                  slotProps={{
+                    primary: { sx: { fontFamily: FONT, fontWeight: 700, color: INK } },
+                    secondary: { sx: { fontFamily: FONT, color: MUTED } },
+                  }}
                 />
               </ListItem>
             ))}
