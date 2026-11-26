@@ -137,7 +137,7 @@ export default function Dashboard({ user, onProfileUpdated, onLogout }) {
             <Box
               sx={{
                 display: 'grid',
-                gridTemplateColumns: { xs: '1fr', '@media (min-width:900px)': 'repeat(3, 1fr)' },
+                gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
                 gap: '24px',
                 alignItems: 'start',
               }}
