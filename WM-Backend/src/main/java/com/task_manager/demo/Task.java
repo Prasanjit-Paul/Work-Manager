@@ -14,6 +14,8 @@ public class Task {
     private String description;
     private String stage;
     private String importance;
+    @Column(name = "user_id")
+    private Long userId;
 
     public Task() {}
 
@@ -27,4 +29,6 @@ public class Task {
     public void setStage(String stage) { this.stage = stage; }
     public String getImportance() { return importance; }
     public void setImportance(String importance) { this.importance = importance; }
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
 }

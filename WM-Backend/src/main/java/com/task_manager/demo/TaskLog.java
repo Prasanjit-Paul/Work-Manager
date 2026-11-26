@@ -9,6 +9,8 @@ public class TaskLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(name = "user_id")
+    private Long userId;
 
     private Long taskId;
     private String message;
@@ -25,4 +27,6 @@ public class TaskLog {
     public Long getTaskId() { return taskId; }
     public String getMessage() { return message; }
     public LocalDateTime getTimestamp() { return timestamp; }
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
 }
