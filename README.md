@@ -3,8 +3,7 @@
 A full-stack Work management web application with per-user task isolation, activity tracking, analytics reports, and Google/email authentication.
 
 ## Live Demo
-- **Frontend (Cloudflare Pages):** https://work-manager-5uq.pages.dev
-- **Backend API (Render):** https://work-manager-weep.onrender.com
+Demo Link -  https://work-manager-5uq.pages.dev
 
 ## Key Features
 - **Authentication:** Email/password signup and login (BCrypt password hashing) plus Google OAuth 2.0 Sign-In.
