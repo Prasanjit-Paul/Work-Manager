@@ -9,6 +9,7 @@ import org.springframework.web.client.RestClient;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -127,6 +128,16 @@ public class AuthController {
         if (body.containsKey("bio")) user.setBio(body.get("bio"));
 
         return ResponseEntity.ok(toSafeUser(userRepository.save(user)));
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<?> getAllUsers() {
+        var users = userRepository.findAll()
+                .stream()
+                .map(this::toSafeUser)
+                .toList();
+
+        return ResponseEntity.ok(users);
     }
 
     private Map<String, Object> toSafeUser(User u) {
